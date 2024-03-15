@@ -3,14 +3,17 @@ import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 @Entity('user')
 export class PgUser {
     @PrimaryGeneratedColumn()
-    id: number;
+    id_user: number;
 
     @Column()
-    name: string;
+    nm_user: string;
 
     @Column()
-    email: string;
+    email_user: string;
 
     @Column()
-    password: number;
+    password_user: number;
+
+    @Column()
+    created_at: Date;
 }
