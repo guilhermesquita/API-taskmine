@@ -1,19 +1,19 @@
-import {AddUser, LoadUserAll} from '../../../domain/contracts/repos'
+import { AddUser, EditUser, LoadUserAll } from '../../../domain/contracts/repos'
 import { PgConnection } from './helpers/connection'
-import {PgUser} from './entities/'
+import { PgUser } from './entities/'
 import { User } from '../../../domain/entities/user'
 
-export class PgUserRepository implements LoadUserAll, AddUser{
-    async loadAll(): Promise<LoadUserAll.Result>{
+export class PgUserRepository implements LoadUserAll, AddUser, EditUser {
+    async loadAll(): Promise<LoadUserAll.Result> {
         const pgUserRepo = PgConnection.getInstance()
-        .connect()
-        .getRepository(PgUser)
+            .connect()
+            .getRepository(PgUser)
 
         const userPg = await pgUserRepo.find()
         return userPg as unknown as User[]
     };
 
-    async add(user: AddUser.Params):Promise<AddUser.Result>{
+    async add(user: AddUser.Params): Promise<AddUser.Result> {
         const pgUserRepo = new PgUser();
         pgUserRepo.nm_user = user.name;
         pgUserRepo.email_user = user.email;
@@ -30,6 +30,35 @@ export class PgUserRepository implements LoadUserAll, AddUser{
             id: pgUserRepo.id_user,
             statusCode: 201,
             message: 'Usuário cadastrado com sucesso'
+        }
+    }
+
+    async edit(user: EditUser.Params): Promise<EditUser.Result> {
+        const pgUserRepo = PgConnection.getInstance()
+            .connect()
+            .getRepository(PgUser)
+
+        const userToEdit = await pgUserRepo.findOne({
+            where: {
+                id_user: user.id
+            }
+        }) as unknown as PgUser
+
+        userToEdit.nm_user = user.name || userToEdit.nm_user
+        userToEdit.email_user = user.email || userToEdit.email_user
+        userToEdit.password_user = user.password || userToEdit.password_user
+
+        const entityManager = PgConnection.getInstance().connect().createEntityManager()
+
+        await entityManager.transaction(async manager => {
+            const saved = await manager.save(PgUser, userToEdit);
+            await manager.save(saved)
+        })
+
+        return {
+            id: userToEdit.id_user,
+            statusCode: 201,
+            message: 'Usuário editado com sucesso'
         }
     }
 }
