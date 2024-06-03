@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
 
 @Entity('user')
 export class PgUser {
@@ -12,5 +12,8 @@ export class PgUser {
     email_user: string;
 
     @Column()
-    password_user: number;
+    password_user: string;
+
+    @CreateDateColumn({ type: 'timestamp' })
+    created_at: Date
 }
