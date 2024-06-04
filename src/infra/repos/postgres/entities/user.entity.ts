@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
 
-@Entity('user')
+@Entity('tbl_user')
 export class PgUser {
     @PrimaryGeneratedColumn()
     id_user: number;
