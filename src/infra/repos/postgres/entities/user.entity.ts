@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from "typeorm";
+import { PgList } from "./list.entity";
 
 @Entity('tbl_user')
 export class PgUser {
@@ -16,4 +17,7 @@ export class PgUser {
 
     @CreateDateColumn({ type: 'timestamp' })
     created_at: Date
+
+    @OneToMany(() => PgList, list => list.fr_user)
+    listRl: PgList[]
 }
