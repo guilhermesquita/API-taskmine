@@ -1,9 +1,14 @@
-import { AddUser, EditUser, LoadUserAll } from '../../../domain/contracts/repos'
 import { PgConnection } from './helpers/connection'
-import { PgUser } from './entities/'
-import { User } from '../../../domain/entities/user'
+import { AddUser, Authenticate, CheckUserById, EditUser, LoadUserAll } from '@/domain/contracts/repos'
+import { User } from '@/domain/entities'
+import { PgUser } from './entities'
+import { JwtTokenHandler } from '@/infra/gateways'
 
-export class PgUserRepository implements LoadUserAll, AddUser, EditUser {
+export class PgUserRepository implements LoadUserAll,
+    AddUser,
+    EditUser,
+    CheckUserById,
+    Authenticate {
     async loadAll(): Promise<LoadUserAll.Result> {
         const pgUserRepo = PgConnection.getInstance()
             .connect()
@@ -27,7 +32,7 @@ export class PgUserRepository implements LoadUserAll, AddUser, EditUser {
         })
 
         return {
-            id: pgUserRepo.id_user,
+            id: pgUserRepo.id_user as number,
             statusCode: 201,
             message: 'Usuário cadastrado com sucesso'
         }
@@ -56,9 +61,53 @@ export class PgUserRepository implements LoadUserAll, AddUser, EditUser {
         })
 
         return {
-            id: userToEdit.id_user,
+            id: userToEdit.id_user as number,
             statusCode: 201,
             message: 'Usuário editado com sucesso'
+        }
+    }
+
+    async check(id: number): Promise<CheckUserById.Result> {
+        const pgUserRepo = PgConnection.getInstance()
+            .connect()
+            .getRepository(PgUser)
+
+        let idExists = false
+
+        const idFind = await pgUserRepo.findOne({
+            where: {
+                id_user: id
+            }
+        }) as unknown as PgUser
+
+        idFind ? idExists = true : idExists = false 
+        return idExists
+    }
+
+    async auth(params: Authenticate.Params): Promise<Authenticate.Result> {
+        const pgUserRepo = PgConnection.getInstance()
+            .connect()
+            .getRepository(PgUser)
+
+
+        const userPg = await pgUserRepo.findOne({
+            where: {
+                email_user: params.email,
+                password_user: params.password
+            }
+        }) as unknown as PgUser
+
+        const token = new JwtTokenHandler()
+
+        const jwtToken = await token.generate({
+            expirationInMs: 8 * 60 * 60 * 1000,
+            key: userPg.id_user as string
+        })
+
+        return {
+            id: userPg.id_user as number,
+            email: userPg.email_user,
+            token: jwtToken
         }
     }
 }

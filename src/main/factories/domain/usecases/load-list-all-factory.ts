@@ -1,8 +1,10 @@
+import { JwtTokenHandler } from '@/infra/gateways'
 import { LoadListAll } from '../../../../domain/contracts/repos'
 import { DbLoadListAll } from '../../../../domain/usecases'
-import { PgListRepository } from '../../../../infra/repos/postgres'
+import { PgListRepository, PgUserRepository } from '../../../../infra/repos/postgres'
 
 export const makeDbLoadListAll = (): LoadListAll => {
   const pgListRepository = new PgListRepository()
-  return new DbLoadListAll(pgListRepository)
+  const pgUserRepository = new PgUserRepository()
+  return new DbLoadListAll(pgListRepository, pgUserRepository, new JwtTokenHandler())
 }

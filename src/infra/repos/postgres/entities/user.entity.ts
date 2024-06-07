@@ -4,7 +4,7 @@ import { PgList } from "./list.entity";
 @Entity('tbl_user')
 export class PgUser {
     @PrimaryGeneratedColumn()
-    id_user: number;
+    id_user: number | string;
 
     @Column()
     nm_user: string;
