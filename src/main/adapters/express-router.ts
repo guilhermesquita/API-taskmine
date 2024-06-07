@@ -5,7 +5,9 @@ export const adaptExpressRoute = (controller: Controller) => {
   return async (req: Request, res: Response) => {
     const request = {
       ...(req.body || {}),
-      ...(req.params || {})
+      ...(req.params || {}),
+      ...(req.headers || {}),
+      ...(req.query || {})
     }
     const httpResponse = await controller.handle(request)
     if (httpResponse.statusCode >= 200 && httpResponse.statusCode <= 299) {

@@ -1,10 +1,14 @@
 import { PgConnection } from './helpers/connection'
-import { AddUser, Authenticate, EditUser, LoadUserAll } from '@/domain/contracts/repos'
+import { AddUser, Authenticate, CheckUserById, EditUser, LoadUserAll } from '@/domain/contracts/repos'
 import { User } from '@/domain/entities'
 import { PgUser } from './entities'
 import { JwtTokenHandler } from '@/infra/gateways'
 
-export class PgUserRepository implements LoadUserAll, AddUser, EditUser, Authenticate {
+export class PgUserRepository implements LoadUserAll,
+    AddUser,
+    EditUser,
+    CheckUserById,
+    Authenticate {
     async loadAll(): Promise<LoadUserAll.Result> {
         const pgUserRepo = PgConnection.getInstance()
             .connect()
@@ -63,12 +67,29 @@ export class PgUserRepository implements LoadUserAll, AddUser, EditUser, Authent
         }
     }
 
-    async auth(params: Authenticate.Params): Promise<Authenticate.Result>{
+    async check(id: number): Promise<CheckUserById.Result> {
         const pgUserRepo = PgConnection.getInstance()
-           .connect()
-           .getRepository(PgUser)
+            .connect()
+            .getRepository(PgUser)
 
-        
+        let idExists = false
+
+        const idFind = await pgUserRepo.findOne({
+            where: {
+                id_user: id
+            }
+        }) as unknown as PgUser
+
+        idFind ? idExists = true : idExists = false 
+        return idExists
+    }
+
+    async auth(params: Authenticate.Params): Promise<Authenticate.Result> {
+        const pgUserRepo = PgConnection.getInstance()
+            .connect()
+            .getRepository(PgUser)
+
+
         const userPg = await pgUserRepo.findOne({
             where: {
                 email_user: params.email,
@@ -83,7 +104,7 @@ export class PgUserRepository implements LoadUserAll, AddUser, EditUser, Authent
             key: userPg.id_user as string
         })
 
-        return{
+        return {
             id: userPg.id_user as number,
             email: userPg.email_user,
             token: jwtToken
