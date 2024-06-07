@@ -13,8 +13,8 @@ export class EditUserController implements Controller{
             if(erro){
                 return badRequest(erro)
             }
-            const {id, name, email, password} = request
-            const result = await this.editUser.edit({id, name, email, password})
+            const {id, name, email, password, authorization} = request
+            const result = await this.editUser.edit({id, name, email, password, token: authorization})
             return created(result)
         } catch (error: any) {
             return serverError(error)
@@ -28,5 +28,6 @@ export namespace EditUserController {
         name: string
         email: string
         password: string
+        authorization: string
     }
 }

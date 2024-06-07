@@ -12,5 +12,6 @@ export namespace AddUser{
         id: number
         statusCode: number
         message: string
+        token: string
     }
 }

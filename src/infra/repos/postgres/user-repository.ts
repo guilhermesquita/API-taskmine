@@ -27,13 +27,21 @@ export class PgUserRepository implements LoadUserAll,
         const entityManager = PgConnection.getInstance().connect().createEntityManager()
 
         await entityManager.transaction(async manager => {
-            const saved = await manager.save(PgUser, pgUserRepo);
+            let saved = await manager.save(PgUser, pgUserRepo);
             await manager.save(saved)
+        })
+
+        const token = new JwtTokenHandler()
+
+        const jwtToken = await token.generate({
+            expirationInMs: 8 * 60 * 60 * 1000,
+            key: pgUserRepo.id_user as string
         })
 
         return {
             id: pgUserRepo.id_user as number,
             statusCode: 201,
+            token: jwtToken,
             message: 'Usuário cadastrado com sucesso'
         }
     }
