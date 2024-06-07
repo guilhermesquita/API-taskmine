@@ -11,6 +11,18 @@ export class DbEditUser implements EditUser {
     ){}
     async edit(user: EditUser.Params): Promise<EditUser.Result | HttpResponse>{
 
+        let idExists = false
+
+        !idExists ? await this.checkUserExistsById.check(user.id) : idExists = false
+
+        if(!idExists){
+            return {
+                id: Number(user.id),
+                statusCode: 406,
+                message: 'Usuário não encontrado!'
+            }
+        }
+
         if (!user.token) {
             return unauthorized();
         }
