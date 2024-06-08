@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, JoinColumn, PrimaryColumn } from "typeorm";
 import { PgUser } from "./user.entity";
 
 @Entity('tbl_list')
 export class PgList {
-    @PrimaryGeneratedColumn()
-    id_list: number;
+    @PrimaryColumn()
+    id_list: string;
 
     @Column()
     nm_list: string;
